@@ -1,0 +1,147 @@
+body {
+	margin-left: 70px;
+	margin-right: 70px;
+	height: 100%;
+	min-height: 100%;
+	background-color: "ffffff";
+}
+
+#ui_login { display:block; }
+
+#ui_play { display:none; }
+
+#error div { text-align: center;}
+
+.userForm{
+	background-color: #5F9EA0;
+	border: 3px solid white;
+	margin-top: 100px;
+	margin-left: 200px;
+	margin-right: 200px;
+    float: top;
+	border-radius: 20px;
+    padding: 10px 55px 40px;
+    box-shadow: 0 0 5px;
+    
+}
+
+.userForm div, h2 {
+	margin-top: 30px;
+	text-align: center;
+}
+
+h1 {
+	color: #5F9EA0;
+	text-align: center;
+	font-family: "Courier New", monospace;
+}
+
+h2 {
+	font-family: "Courier New", monospace;
+}
+
+h3 {
+	color: #5F9EA0;
+	font-family: "Courier New", monospace;
+	font-size: 25px;
+	margin-top: 12px;
+}
+
+p {
+	font-family: Verdana, sans-serif;
+	text-align: center;
+}
+
+a {
+    color: white;
+    text-decoration: underline;
+	font-family: Verdana, sans-serif;
+}
+
+#body {
+	background-color: #dbe3ea;
+	margin: 4px;
+    padding: 10px;
+    padding-bottom: 30px;
+}
+
+
+#ui_nav ul {
+	list-style-type: none;
+	background-color: #5F9EA0;
+	padding: 0px;
+	padding-top: 3px;
+	margin-left: 3px;
+	margin-right: 3px;
+
+	display: flex;      
+	flex-flow: row nowrap;
+	align-content: center;
+}
+
+#ui_nav li {
+	padding: 3px;
+	margin-top: -3px;
+	border: 1px solid white;
+	text-align: center;
+
+	flex: 1 1 0px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#ui_nav a {
+	align-content: right;
+	text-decoration: none;
+	
+	color: white;
+}
+
+#sidebar ul{
+	background-color: #5F9EA0;
+	float: left;
+	margin-left: 20px;
+	margin-right: 10px;
+	padding: 0px;
+}
+
+#sidebar li {
+	list-style: none;
+	border: 1px solid white;
+	padding: 10px;
+	padding-left: 30px;
+	padding-right: 30px;
+}
+
+#sidebar a {
+	text-decoration: none;
+	color: white;
+	font-family: "Courier New", monospace;
+	font-size: 18px;
+}
+
+.instructions_section {
+	margin-left: 22%;
+	padding-top: 1px;
+	float: top;
+}
+
+.instructions_section p {
+	text-align: left;
+}
+
+#pistolText {
+	color: blue;
+}
+
+#sniperText {
+	color: #d0ca00;
+}
+
+#shotgunText {
+	color: red;
+}
+
+#ui_profile div {
+	text-align: center;
+}
