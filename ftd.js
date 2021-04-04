@@ -3,6 +3,8 @@
 // https://www.sohamkamani.com/blog/2018/05/30/understanding-how-expressjs-works/
 
 var port = 8000; 
+var webSocketPort = port+1;
+
 var express = require('express');
 var app = express();
 
@@ -15,6 +17,23 @@ const pool = new Pool({
     port: 5432
 });
 
+// static_files has all of statically returned content
+// https://expressjs.com/en/starter/static-files.html
+app.use('/',express.static('static_files')); // this directory has files to be returned
+
+app.use('/',express.static('static_content')); 
+
+app.listen(port, function () {
+  	console.log('Example app listening on port '+port);
+});
+
+// Web Sockets
+var WebSocketServer = require('ws').Server
+   ,wss = new WebSocketServer({port: webSocketPort});
+   
+
+var messages=[];
+   
 const bodyParser = require('body-parser'); // we used this middleware to parse POST bodies
 
 function isObject(o){ return typeof o === 'object' && o !== null; }
@@ -399,9 +418,62 @@ app.post('/api/auth/test', function (req, res) {
 	res.json({"message":"got to /api/auth/test"}); 
 });
 
-app.use('/',express.static('static_content')); 
 
-app.listen(port, function () {
-  	console.log('Example app listening on port '+port);
+//Web socket stuff below
+
+wss.on('close', function() {
+    console.log('disconnected');
 });
+
+wss.broadcast = function(message){
+	for(let ws of this.clients){ 
+		ws.send(message); 
+	}
+
+	// Alternatively
+	// this.clients.forEach(function (ws){ ws.send(message); });
+}
+
+var j = 0;
+var touchesList = [];
+wss.on('connection', function(ws) {
+	var i;
+	for(i=0;i<messages.length;i++){
+		ws.send(messages[i]);
+	}
+	var red = Math.round(Math.random()*255);
+	var green = Math.round(Math.random()*255);
+	var blue = Math.round(Math.random()*255);
+	
+	ws.clientNum = j;
+	j++;
+
+	ws.on('message', function(message) {
+		message = [
+			{
+				color: [red, green, blue],
+				touches: JSON.parse(message)
+			}
+		];
+		touchesList[ws.clientNum] = message[0];
+
+		for (var k = 0; k < j; k++){
+			if (k != ws.clientNum){
+				message.push(touchesList[k]);
+			}
+		}
+
+
+		console.log(JSON.stringify(message));
+		ws.send(JSON.stringify(message)); 
+		wss.broadcast(JSON.stringify(message));
+		messages.push(JSON.stringify(message));
+	});
+
+	ws.on("close", () => {
+		console.log("client disconnected");
+	});
+});
+
+
 

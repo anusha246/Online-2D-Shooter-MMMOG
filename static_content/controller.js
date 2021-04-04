@@ -6,9 +6,14 @@ var pausedGame = false;
 const SPEED = 3;
 var loggedIn = false;
 
+//Websocket vars
+var socket;
+var context;
+var allClients = {};
+
 function setupGame(){
 
-	stage=new Stage(document.getElementById('stage'));
+	//stage=new Stage(document.getElementById('stage'));
 
 	//Add event listeners for mouse and keyboard events
 	document.addEventListener('mousemove', aimByMouse);
@@ -125,6 +130,77 @@ function shootByMouse(event){
 										stage.player.gunType));
 			stage.player.ammo--;
 
+		}
+	}
+}
+
+function updateTouch (eventType, event) {
+	event.preventDefault();
+
+	//relative to the viewport
+	var rect = stage.canvas.getBoundingClientRect();
+	
+	var touches = [];
+	if (!stage.isGameDone){
+		for (var i = 0; i < event.touches.length ; i++) {
+				var touch = event.touches[i];
+			touches.push({"x": (touch.clientX - rect.left) / (rect.right - rect.left) * stage.width + stage.player.position.x - stage.width/2, 
+							"y":(touch.clientY - rect.top) / (rect.bottom - rect.top) * stage.height + stage.player.position.y - stage.height/2 });
+		}
+	}
+	
+	console.log(JSON.stringify(touches));
+	socket.send(JSON.stringify(touches));
+}
+
+function update(){
+	// clear the screen 
+	//context.clearRect (0, 0, stage.canvas.width, stage.canvas.height);
+	
+	for(const c in allClients){
+		client = allClients[c];
+		
+		if (client && client.color) {
+			var red=client.color[0];
+			var green=client.color[1];
+			var blue=client.color[2];
+
+			for (var i = 0; i < client.touches.length ; i++) {
+					var touch = client.touches[i];
+					context.beginPath ();
+					context.arc (touch.x, touch.y, 20, 0, 2 * Math.PI, true);
+					
+				context.fillStyle = `rgba(${red},${green},${blue},0.2)`;
+					context.fill ();
+					
+					context.lineWidth = 2.0;
+					context.strokeStyle = `rgba(${red},${green},${blue}, 0.8)`;
+					context.stroke ();
+			}
+			
+			
+			if(!stage.isGameDone){
+				if(client.touches.length > 0){
+					console.log("Touch to move detected");
+					console.log("Touch[0]: " + client.touches[0]);
+					console.log("Touch[0].x: " + touch.x + "  Touch[0].y: " + touch.y);
+					var touch = client.touches[0];
+					stage.player.headTo(new Pair (touch.x, touch.y));
+				/*
+				} else if (key=='p'){
+					pausedGame = (!pausedGame);
+					if (pausedGame != false){
+						pauseGame();
+					} else {
+						startGame();
+					}
+				*/
+				} else {
+					if(!stage.isGameDone){
+						stage.player.velocity=new Pair(0,0);
+					}
+				}
+			}
 		}
 	}
 }
@@ -592,35 +668,57 @@ function test(){
 }
 
 $(function(){
-        // Setup all events here and display the appropriate UI
-        $("#loginSubmit").on('click',function(){ login(); });
-		$("#registerSubmit").on('click',function(){ register(); });
-		$("#createAccount").on('click',function(){ createAccount(); });
-		$("#playButton").on('click',function(){ play(); });
-		$("#instructionsButton").on('click',function(){ instructions(); });
-		$("#statsButton").on('click',function(){ stats(); });
-		$("#profileButton").on('click',function(){ profile(); });
-		$("#logoutButton").on('click',function(){ logout(); });
+	// Setup all events here and display the appropriate UI
+	$("#loginSubmit").on('click',function(){ login(); });
+	$("#registerSubmit").on('click',function(){ register(); });
+	$("#createAccount").on('click',function(){ createAccount(); });
+	$("#playButton").on('click',function(){ play(); });
+	$("#instructionsButton").on('click',function(){ instructions(); });
+	$("#statsButton").on('click',function(){ stats(); });
+	$("#profileButton").on('click',function(){ profile(); });
+	$("#logoutButton").on('click',function(){ logout(); });
 
-		
-		$("#goalSideButton").on('click',function(){ goal(); });
-		$("#controlsSideButton").on('click',function(){ controls(); });
-		$("#gunTypesSideButton").on('click',function(){ gunTypes(); });
-		
-		
-		$("#changeUsernameButton").on('click',function(){ changeUsername(); });
-		$("#changeEmailButton").on('click',function(){ changeEmail(); });
-		$("#deleteUserButton").on('click',function(){ deleteUser(); });
+	
+	$("#goalSideButton").on('click',function(){ goal(); });
+	$("#controlsSideButton").on('click',function(){ controls(); });
+	$("#gunTypesSideButton").on('click',function(){ gunTypes(); });
+	
+	
+	$("#changeUsernameButton").on('click',function(){ changeUsername(); });
+	$("#changeEmailButton").on('click',function(){ changeEmail(); });
+	$("#deleteUserButton").on('click',function(){ deleteUser(); });
 
-		$('#error').show();
-        $("#ui_nav").hide();
-		$("#body").hide();
-		$("#ui_login").show();
-		$("#ui_register").hide();
-        $("#ui_play").hide();
-		$("#ui_instructions").hide();
-		$("#ui_stats").hide();
-		$("#ui_profile").hide();
+	$('#error').show();
+	$("#ui_nav").hide();
+	$("#body").hide();
+	$("#ui_login").show();
+	$("#ui_register").hide();
+	$("#ui_play").hide();
+	$("#ui_instructions").hide();
+	$("#ui_stats").hide();
+	$("#ui_profile").hide();
+	
+	//Websocket stuff
+	stage=new Stage(document.getElementById('stage'));
+	context=stage.canvas.getContext("2d");
+	
+	socket = new WebSocket(`ws://${window.location.hostname}:8001`);
+	socket.onopen = function (event) {
+		console.log("connected");
+		stage.canvas.addEventListener('touchend', function (event) { updateTouch("touchend", event); });
+		stage.canvas.addEventListener('touchmove', function (event) { updateTouch("touchmove", event); });
+		stage.canvas.addEventListener('touchstart', function (event) { updateTouch("touchstart", event) ;});
+	};
+	socket.onclose = function (event) {
+		alert("closed code:" + event.code + " reason:" +event.reason + " wasClean:"+event.wasClean);
+	};
+	socket.onmessage = function (event) {
+		console.log(event.data);
+		allClients=JSON.parse(event.data);
+		update();
+	}
+		
+		
 
 
 		
