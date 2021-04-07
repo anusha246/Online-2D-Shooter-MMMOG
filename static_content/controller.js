@@ -639,14 +639,14 @@ function changeEmail() {
 }
 
 function updateField(field, message, tag, index) {
-	var getDiv = document.getElementById(field);
-	var setTag = getDiv.getElementsByTagName(tag)[index];
-	setTag.innerHTML += message;
+	//var getDiv = document.getElementById(field);
+	//var setTag = getDiv.getElementsByTagName(tag)[index];
+	//setTag.innerHTML += message;
 }
 function setField(field, message, tag, index) {
 	var getDiv = document.getElementById(field);
-	var setTag = getDiv.getElementsByTagName(tag)[index];
-	setTag.innerHTML = message;
+	//var setTag = getDiv.getElementsByTagName(tag)[index];
+	//setTag.innerHTML = message;
 }
 function resetField(field){
 	var toReset = document.getElementById(field);
