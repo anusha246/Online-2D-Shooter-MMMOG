@@ -10,6 +10,12 @@ var loggedIn = false;
 var socket;
 var context;
 var allClients = {};
+var player;
+
+var viewWidth;
+var viewHeight;
+var camX;
+var camY;
 
 function setupGame(){
 
@@ -24,23 +30,7 @@ function setupGame(){
 
 }
 
-function startGame(){
-	animate();
-}
 
-//Animate game if not paused or done
-function animate() {
-
-	stage.step();
-	stage.draw();
-	
-	if (pausedGame) { 
-		pauseGame(); 
-	} else if (!stage.isGameDone){
-		requestAnimationFrame(animate);	
-	}
-
-}
 
 
 function pauseGame(){
@@ -137,26 +127,263 @@ function shootByMouse(event){
 function updateTouch (eventType, event) {
 	event.preventDefault();
 
-	//relative to the viewport
-	var rect = stage.canvas.getBoundingClientRect();
+	if (!stage) {
+		console.log(JSON.stringify([]));
+		socket.send(JSON.stringify([]));
+	}
+
+	if (player){
+		//relative to the viewport
+		var rect = canvas.getBoundingClientRect();
+		
+		var touches = [];
+		//touches.push(stage);
+		//if (!stage.isGameDone){
+			for (var i = 0; i < event.touches.length ; i++) {
+					var touch = event.touches[i];
+				touches.push({"x": (touch.clientX - rect.left) / (rect.right - rect.left) * stage.width + player.x - stage.width/2, 
+								"y":(touch.clientY - rect.top) / (rect.bottom - rect.top) * stage.height + player.y - stage.height/2 });
+			}
+		//}
+		
+		console.log(JSON.stringify(touches));
+		socket.send(JSON.stringify(touches));
+	}
+}
+
+function drawBox(box){
+		
+	context.fillStyle = box.colour;
+	context.fillRect(box.x, box.y, box.width, box.height);  
 	
-	var touches = [];
-	if (!stage.isGameDone){
-		for (var i = 0; i < event.touches.length ; i++) {
-				var touch = event.touches[i];
-			touches.push({"x": (touch.clientX - rect.left) / (rect.right - rect.left) * stage.width + stage.player.position.x - stage.width/2, 
-							"y":(touch.clientY - rect.top) / (rect.bottom - rect.top) * stage.height + stage.player.position.y - stage.height/2 });
-		}
+	//Only show health on box if ammo box
+	if (box.type == "Ammo"){
+		context.font = "15px Courier New";
+		context.fillStyle = "black";
+		context.textAlign = "center";
+		context.fillText(box.health, box.x+box.width/2, box.y+box.height/2+4);
+	}
+		
+}
+
+function drawBall(ball){
+	
+	context.fillStyle = ball.colour;
+	
+	context.beginPath(); 
+	context.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI, false); 
+	context.fill();   
+
+}
+
+function drawPlayer(player){
+		
+	//Draw turret
+	
+	//Set turret colour based on gunType
+	if (player.gunType == "Pistol"){
+		context.fillStyle = "blue";
+		context.strokeStyle = "blue"; 
+	} else if (player.gunType == "Sniper"){
+		context.fillStyle = "yellow";
+		context.strokeStyle = "yellow";
+		
+	//Shotgun
+	} else {
+		context.fillStyle = "red";
+		context.strokeStyle = "red";
 	}
 	
-	console.log(JSON.stringify(touches));
-	socket.send(JSON.stringify(touches));
+	context.beginPath(); 
+	context.arc(player.turret_pos.x, player.turret_pos.y, player.radius - 8, 0, 2 * Math.PI, false); 
+	context.stroke();
+	context.fill();
+	
+	//Set stroke, fill colors
+	context.fillStyle = player.colour;
+	context.strokeStyle = player.colour;
+	
+	//Draw main body
+	context.beginPath(); 
+	context.arc(player.x, player.y, player.radius, 0, 2 * Math.PI, false); 
+	context.stroke();
+	
+	//Show player ammo
+	context.font = "15px Courier New";
+	context.fillStyle = "white";
+	context.textAlign = "center";
+	context.fillText(player.ammo, player.turret_pos.x, player.turret_pos.y +4);   
+	
+	//Show player health 
+	context.font = "20px Courier New";
+	context.fillStyle = "black";
+	context.textAlign = "center";
+	context.fillText(player.health, player.x, player.y+6);
+	
+	//Show player score
+	context.font = "17px Courier New";
+	context.fillStyle = "black";
+	context.textAlign = "left";
+	context.fillText("Score: " + player.score, player.x - view_width/2 + 10, 
+						player.y - view_height/2 + 20);
+		
+	
 }
+
+function drawOpponent(opponent){
+		
+	//Draw turret
+	console.log(opponent);
+	
+	//Set turret colour based on gunType
+	if (opponent.gunType == "Pistol"){
+		context.fillStyle = "blue";
+		context.strokeStyle = "blue"; 
+	} else if (opponent.gunType == "Sniper"){
+		context.fillStyle = "yellow";
+		context.strokeStyle = "yellow";
+		
+	//Shotgun
+	} else {
+		context.fillStyle = "red";
+		context.strokeStyle = "red";
+	}
+		
+	context.beginPath(); 
+	context.arc(opponent.turret_pos.x, opponent.turret_pos.y, opponent.radius - 8, 0, 2 * Math.PI, false); 
+	context.stroke();
+	context.fill();
+	
+	//Set stroke, fill colors
+	context.fillStyle = opponent.colour;
+	context.strokeStyle = opponent.colour;
+	
+	//Draw main body
+	context.beginPath(); 
+	context.arc(opponent.x, opponent.y, opponent.radius, 0, 2 * Math.PI, false); 
+	context.stroke(); 
+	
+	//Show ammo
+	context.font = "15px Courier New";
+	context.fillStyle = "white";
+	context.textAlign = "center";
+	context.fillText(opponent.ammo, opponent.turret_pos.x, opponent.turret_pos.y+4);
+	
+	//Show health 
+	context.font = "20px Courier New";
+	context.fillStyle = "black";
+	context.textAlign = "center";
+	context.fillText(opponent.health, opponent.x, opponent.y+6);
+	
+	
+	
+}
+
+function drawBullet(bullet){
+		
+	//Set stroke, fill colors
+	context.fillStyle = bullet.colour;
+	context.strokeStyle = "black";
+	
+	//Draw bullet
+	context.beginPath(); 
+	context.arc(bullet.x, bullet.y, bullet.radius, 0, 2 * Math.PI, false); 
+	context.stroke();
+	context.fill(); 
+		
+}
+
+
+
+
 
 function update(){
 	// clear the screen 
 	//context.clearRect (0, 0, stage.canvas.width, stage.canvas.height);
 	
+	
+		
+		if (stage.isGameDone){
+			
+			//Set background and font for game done screen on viewport
+			context.fillStyle = 'rgba(0,0,0,0.5)';
+			context.fillRect(-view_width, -view_height, 
+					stage.width+view_width + view_width, stage.height+view_height + view_height);
+			
+			context.font = "30px Courier New";
+			context.fillStyle = "white";
+			context.textAlign = "center";
+			
+			//If player is dead, show Game Over (game loss) and score
+			if (player == null){
+				context.fillText("Game Over", stage.midPosition.x, stage.midPosition.y);
+				context.fillText("Your score is " + stage.score, 
+									stage.midPosition.x, stage.midPosition.y + 30);
+									
+			//All opponents are dead, show Game Won and score
+			} else {
+				var bonus = 5;
+				stage.score += bonus;
+				
+				context.fillText("You Won!", stage.midPosition.x, stage.midPosition.y);
+				context.fillText("The win bonus is " + bonus, 
+									stage.midPosition.x, stage.midPosition.y + 30);
+				context.fillText("Your score is " + stage.score, 
+									stage.midPosition.x, stage.midPosition.y + 60);
+			}
+				
+		//Game is not done
+		} else {
+			
+			//Reset the transform matrix, clear canvas
+			context.setTransform(1,0,0,1,0,0);
+			context.clearRect(0, 0, stage.width, stage.height);
+			console.log(stage.width);
+			console.log(stage.height);
+			
+			
+			//Set viewport position centered on player and translate to it
+			camX = -player.x + view_width / 2;
+			camY = -player.y + view_height / 2;
+			
+			context.translate( camX, camY ); 
+			
+			//Color canvas white with black border
+			context.fillStyle = "white";
+			context.fillRect(0, 0, stage.width, stage.height);
+			context.strokeStyle = 'black';
+			context.fillStyle = 'rgba(0,0,0,1)';
+			context.strokeRect(0, 0, stage.width, stage.height);
+			
+			//Loop through all actors
+			for(var i=0;i<stage.actors.length;i++){
+
+				//If actor exists, draw it
+				if (stage.actors[i]){
+					//stage.actors[i].draw(context);
+					
+					if (stage.actors[i].myClass == "Box"){
+						drawBox(stage.actors[i]);
+					} else if (stage.actors[i].myClass == "Ball"){
+						drawBall(stage.actors[i]);
+					} else if (stage.actors[i].myClass == "Player"){
+						drawPlayer(stage.actors[i]);
+					} else if (stage.actors[i].myClass == "Opponent"){
+						drawOpponent(stage.actors[i]);
+					} else if (stage.actors[i].myClass == "Bullet"){
+						drawBullet(stage.actors[i]);
+					}
+					
+					
+				}
+			
+			}
+		}
+		
+		
+		
+	
+	/*
 	for(const c in allClients){
 		client = allClients[c];
 		
@@ -195,6 +422,7 @@ function update(){
 						startGame();
 					}
 				*/
+				/*
 				} else {
 					if(!stage.isGameDone){
 						stage.player.velocity=new Pair(0,0);
@@ -203,6 +431,8 @@ function update(){
 			}
 		}
 	}
+	*/
+	
 }
 
 function login(){
@@ -236,7 +466,7 @@ function login(){
 		$("#ui_nav").show();
 		loggedIn = true;
 		setupGame();
-		startGame();
+		//startGame();
 	
 	}).fail(function(err){
 
@@ -699,23 +929,51 @@ $(function(){
 	$("#ui_profile").hide();
 	
 	//Websocket stuff
-	stage=new Stage(document.getElementById('stage'));
-	context=stage.canvas.getContext("2d");
 	
 	socket = new WebSocket(`ws://${window.location.hostname}:8001`);
 	socket.onopen = function (event) {
 		console.log("connected");
-		stage.canvas.addEventListener('touchend', function (event) { updateTouch("touchend", event); });
-		stage.canvas.addEventListener('touchmove', function (event) { updateTouch("touchmove", event); });
-		stage.canvas.addEventListener('touchstart', function (event) { updateTouch("touchstart", event) ;});
+		
+		//alert("New stage created");
+		canvas=document.getElementById("stage");
+		context = canvas.getContext('2d');
+
+		/*
+		var canvas_message = [
+			{
+				canvasWidth: canvas.width,
+				canvasHeight: canvas.height
+			}
+
+
+		];
+		*/
+		
+		//Get the width and height of the html canvas viewport
+		view_width=canvas.width;
+		view_height=canvas.height;
+
+
+		//console.log(JSON.stringify(canvas_message));
+		
+		
+		canvas.addEventListener('touchend', function (event) { updateTouch("touchend", event); });
+		canvas.addEventListener('touchmove', function (event) { updateTouch("touchmove", event); });
+		canvas.addEventListener('touchstart', function (event) { updateTouch("touchstart", event) ;});
 	};
 	socket.onclose = function (event) {
 		alert("closed code:" + event.code + " reason:" +event.reason + " wasClean:"+event.wasClean);
 	};
 	socket.onmessage = function (event) {
 		console.log(event.data);
-		allClients=JSON.parse(event.data);
-		update();
+		stage=JSON.parse(event.data);
+		player = stage.actors[3];
+		//player=JSON.parse(JSON.parse(event.data)[1]);
+		console.log(stage);
+		if (player){
+			//update();
+			requestAnimationFrame(update);
+		}
 	}
 		
 		
