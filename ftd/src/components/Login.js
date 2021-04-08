@@ -81,7 +81,7 @@ export class Login extends Component {
     registerHandler() {
         this.setState({ 
             viewRegister: false,
-
+            viewLogin: true,
         });
     }
 

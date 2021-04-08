@@ -193,14 +193,6 @@ class Navigation extends Component {
                                 <Nav.Link href="#stats" onClick = {this.handleLeaderboardClick} >Leaderboard</Nav.Link>
                                 <Nav.Link href="#profile" onClick = {this.handleProfileClick}>Profile</Nav.Link>
                                 <Nav.Link href="#instructions" onClick = {this.handleInstructionsClick}>Instructions</Nav.Link>
-
-                                <NavDropdown title="Instructions" id="collasible-nav-dropdown">
-                                    <NavDropdown.Item href="#action/3.1">Leaderboard</NavDropdown.Item>
-                                    <NavDropdown.Item href="#action/3.2">Profile</NavDropdown.Item>
-                                    <NavDropdown.Item href="#action/3.3">Logout</NavDropdown.Item>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
-                                </NavDropdown>
                             </Nav>
                             <Nav>
                                 <Nav.Link href="#Logout" onClick = {this.handleLogoutClick}>Logout</Nav.Link>
