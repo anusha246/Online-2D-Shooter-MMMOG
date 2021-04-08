@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import Profile from './Profile.js';
 import Instructions from './Instructions.js';
+import Login from './Login.js';
+
 
 //import * as ReactBootstrap from "react-bootstrap";
 
@@ -11,7 +13,6 @@ class Navigation extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            isLoggedIn: false,
             response: '',
             post: '',
             username: props.username,
@@ -21,13 +22,18 @@ class Navigation extends Component {
             lastName: '',
             score: 0,
             responseToPost: '',
+            viewNavbar: props.viewNavbar,
             viewLogin: !props.isLoggedIn,
             viewProfile: false,
             viewInstructions: false,
             viewLeaderboard: false,
         };
 
-        this.stateHandler = this.stateHandler.bind(this);
+        this.nameHandler = this.nameHandler.bind(this);
+        this.emailHandler = this.emailHandler.bind(this);
+        this.deleteHandler = this.deleteHandler.bind(this);
+
+
 
     }
 
@@ -83,15 +89,17 @@ class Navigation extends Component {
 		});
         const body = await response.json();
         if (response.status === 200) {
-            this.setState({ email: body.email });
-            this.setState({ username: body.username });
-            this.setState({ firstName: body.firstname });
-            this.setState({ lastName: body.lastname });
-            this.setState({ score: body.score });
-            this.setState({ viewLogin: false });
-            this.setState({ viewProfile: true });
-            this.setState({ viewLeaderboard: false });
-            this.setState({ viewInstructions: false });
+            this.setState({ 
+                email: body.email,
+                username: body.username, 
+                firstName: body.firstname, 
+                lastName: body.lastname, 
+                score: body.score, 
+                viewLogin: false,
+                viewProfile: true,
+                viewLeaderboard: false,
+                viewInstructions: false 
+            });
             console.log(body);
         }
 		else if (response.status !== 200) {
@@ -104,77 +112,112 @@ class Navigation extends Component {
 
     handleLeaderboardClick = async e => {
 		e.preventDefault();
-        this.setState({ viewLogin: false });
-        this.setState({ viewProfile: false });
-        this.setState({ viewLeaderboard: true });
-        this.setState({ viewInstructions: false });
+        this.setState({ 
+            viewLogin: false,
+            viewProfile: false,
+            viewLeaderboard: true,
+            viewInstructions: false,
+        });
+
     }
 
     handlePlayClick = async e => {
 		e.preventDefault();
-        this.setState({ viewLogin: false });
-        this.setState({ viewProfile: false });
-        this.setState({ viewLeaderboard: false });
-        this.setState({ viewInstructions: false });
+        this.setState({ 
+            viewLogin: false,
+            viewProfile: false,
+            viewLeaderboard: true,
+            viewInstructions: false,
+        });
     }
 
     handleInstructionsClick = async e => {
 		e.preventDefault();
-        this.setState({ viewLogin: false });
-        this.setState({ viewProfile: false });
-        this.setState({ viewLeaderboard: false });
-        this.setState({ viewInstructions: true });
+        this.setState({ 
+            viewLogin: false,
+            viewProfile: false,
+            viewLeaderboard: false,
+            viewInstructions: true,
+        });
     }
 
     handleLogoutClick = async e => {
 		e.preventDefault();
-        this.setState({ viewLogin: true });
-        this.setState({ viewProfile: false });
-        this.setState({ viewLeaderboard: false });
-        this.setState({ viewInstructions: false });
-
+        this.setState({ 
+            viewLogin: true,
+            viewProfile: false,
+            viewLeaderboard: false,
+            viewInstructions: false,
+            viewNavbar: false,
+        });
     }
 
-    stateHandler(name) {
+    nameHandler(name) {
         this.setState({
           username: name
-        })
+        });
+    }
+
+    emailHandler(email) {
+        this.setState({
+          email: email
+        });
       }
+
+    deleteHandler() {
+        this.setState({ 
+            viewLogin: true, 
+            username : '', 
+            email: '', 
+            password: '',
+            viewProfile: false,
+            viewLeaderboard: false,
+            viewInstructions: false,
+            viewNavbar: false,
+        });
+    }
 
 
     render() {
         return (
             <div>
-                <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
-                <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-                <Navbar.Collapse id="responsive-navbar-nav">
-                    <Nav className="mr-auto">
-                        <Nav.Link href="#play" onClick = {this.handlePlayClick}>Play</Nav.Link>
-                        <Nav.Link href="#stats" onClick = {this.handleLeaderboardClick} >Leaderboard</Nav.Link>
-                        <Nav.Link href="#profile" onClick = {this.handleProfileClick}>Profile</Nav.Link>
-                        <Nav.Link href="#instructions" onClick = {this.handleInstructionsClick}>Instructions</Nav.Link>
+                { this.state.viewNavbar ? (
+                    <div>
+                        <h1>f0rt9it32d</h1>
 
-                        <NavDropdown title="Instructions" id="collasible-nav-dropdown">
-                            <NavDropdown.Item href="#action/3.1">Leaderboard</NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.2">Profile</NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.3">Logout</NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
-                        </NavDropdown>
-                    </Nav>
-                    <Nav>
-                        <Nav.Link href="#Logout" onClick = {this.handleLogoutClick}>Logout</Nav.Link>
-                    </Nav>
-                </Navbar.Collapse>
-                </Navbar>
-                <div>
-                    { this.state.viewProfile ? 
-                    (<Profile username = {this.state.username} password = {this.state.password}
-                    email = {this.state.email} score = {this.state.score} firstName = {this.state.firstName}
-                    lastName = {this.state.lastName} handler = {this.stateHandler}/>) : (<body></body>) }
+                        <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+                        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+                        <Navbar.Collapse id="responsive-navbar-nav">
+                            <Nav className="mr-auto">
+                                <Nav.Link href="#play" onClick = {this.handlePlayClick}>Play</Nav.Link>
+                                <Nav.Link href="#stats" onClick = {this.handleLeaderboardClick} >Leaderboard</Nav.Link>
+                                <Nav.Link href="#profile" onClick = {this.handleProfileClick}>Profile</Nav.Link>
+                                <Nav.Link href="#instructions" onClick = {this.handleInstructionsClick}>Instructions</Nav.Link>
 
-                    { this.state.viewInstructions ? (<Instructions/>) : (<body></body>) }
-                </div>
+                                <NavDropdown title="Instructions" id="collasible-nav-dropdown">
+                                    <NavDropdown.Item href="#action/3.1">Leaderboard</NavDropdown.Item>
+                                    <NavDropdown.Item href="#action/3.2">Profile</NavDropdown.Item>
+                                    <NavDropdown.Item href="#action/3.3">Logout</NavDropdown.Item>
+                                    <NavDropdown.Divider />
+                                    <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
+                                </NavDropdown>
+                            </Nav>
+                            <Nav>
+                                <Nav.Link href="#Logout" onClick = {this.handleLogoutClick}>Logout</Nav.Link>
+                            </Nav>
+                        </Navbar.Collapse>
+                        </Navbar>
+                    </div> ) : (<body></body>) 
+                }
+                { this.state.viewLogin ? (<Login/>) : (<body></body>) }
+                
+                { this.state.viewProfile ? 
+                (<Profile username = {this.state.username} password = {this.state.password}
+                email = {this.state.email} score = {this.state.score} firstName = {this.state.firstName}
+                lastName = {this.state.lastName} nameHandler = {this.nameHandler}
+                emailHandler = {this.emailHandler} deleteHandler = {this.deleteHandler}/>) : (<body></body>) }
+
+                { this.state.viewInstructions ? (<Instructions/>) : (<body></body>) }
             </div>
         );
     }
