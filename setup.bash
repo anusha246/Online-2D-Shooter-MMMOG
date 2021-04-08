@@ -1,7 +1,7 @@
 #!/bin/bash
 # -------------------------------------------------------------------------
 # Here is what we did to set this all up...
-sudo chmod -R 711 ../a2/
+sudo chmod -R 711 ../2D-Shooter-MMMOG/
 
 rm package*
 npm init
@@ -20,3 +20,18 @@ npm install pg
 
 psql "dbname='webdb' user='webdbuser' password='password' host='localhost'" -f db/schema.sql
 nodejs ftd.js
+
+#NEW SETUP:
+#rm package*
+#npm init
+#npm install express
+#npm install pg
+#npm install react-bootstrap bootstrap
+#npm install @material-ui/core
+#npm install axios
+#psql "dbname='webdb' user='webdbuser' password='password' host='localhost'" -f db/schema.sql
+#nodejs ftd.js #?? <-- required?
+#npm cache clean --force
+#npm install
+#require('ws'); need to update setup.bash
+#npm start #<-- start react
