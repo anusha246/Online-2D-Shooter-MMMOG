@@ -67,6 +67,27 @@ class Navigation extends Component {
         return body;
 	};
 
+    handleStatisticsClick = async e => {
+		e.preventDefault();
+        this.setState({ viewProfile: false });
+    }
+
+    handlePlayClick = async e => {
+		e.preventDefault();
+        this.setState({ viewProfile: false });
+    }
+
+    handleInstructionsClick = async e => {
+		e.preventDefault();
+        this.setState({ viewProfile: false });
+    }
+
+    handleLogoutClick = async e => {
+		e.preventDefault();
+        this.setState({ viewProfile: false });
+    }
+
+
     render() {
         return (
             <div>
@@ -74,10 +95,10 @@ class Navigation extends Component {
                 <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="mr-auto">
-                        <Nav.Link href="#play">Play</Nav.Link>
-                        <Nav.Link href="#stats">Statistics</Nav.Link>
+                        <Nav.Link href="#play" onClick = {this.handlePlayClick}>Play</Nav.Link>
+                        <Nav.Link href="#stats" onClick = {this.handleStatisticsClick} >Statistics</Nav.Link>
                         <Nav.Link href="#profile" onClick = {this.handleProfileClick}>Profile</Nav.Link>
-                        <Nav.Link href="#instructions">Instructions</Nav.Link>
+                        <Nav.Link href="#instructions" onClick = {this.handleInstructionsClick}>Instructions</Nav.Link>
 
                         <NavDropdown title="Instructions" id="collasible-nav-dropdown">
                             <NavDropdown.Item href="#action/3.1">Statistics</NavDropdown.Item>
@@ -88,7 +109,7 @@ class Navigation extends Component {
                         </NavDropdown>
                     </Nav>
                     <Nav>
-                        <Nav.Link href="#Logout">Logout</Nav.Link>
+                        <Nav.Link href="#Logout" onClick = {this.handleLogoutClick}>Logout</Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
                 </Navbar>
