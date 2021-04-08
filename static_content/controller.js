@@ -965,15 +965,16 @@ $(function(){
 		alert("closed code:" + event.code + " reason:" +event.reason + " wasClean:"+event.wasClean);
 	};
 	socket.onmessage = function (event) {
-		console.log(event.data);
+		//console.log(event.data);
 		stage=JSON.parse(event.data);
-		player = stage.actors[3];
+		player = stage.player;
 		//player=JSON.parse(JSON.parse(event.data)[1]);
-		console.log(stage);
-		if (player){
-			//update();
-			requestAnimationFrame(update);
-		}
+		//console.log(stage);
+		//console.log(stage.actors[0].turret_pos);
+		//console.log(stage.actors[1].turret_pos);
+		//console.log(stage.actors[2].turret_pos);
+		//update();
+		requestAnimationFrame(update);
 	}
 		
 		

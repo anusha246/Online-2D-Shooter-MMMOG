@@ -542,22 +542,14 @@ class Stage {
 					this.actors[i].step();
 					
 					if (this.actors[i].constructor.name == "Opponent"){
-						this.actors[i].turret_pos.x=(this.actors[i].aim_pos.x - this.actors[i].x);
-						this.actors[i].turret_pos.y=(this.actors[i].aim_pos.y - this.actors[i].y);
-						
-						this.actors[i].turret_pos.normalize();
-						
-						this.actors[i].turret_pos.x = this.actors[i].turret_pos.x * this.actors[i].radius + this.actors[i].x;
-						this.actors[i].turret_pos.y = this.actors[i].turret_pos.y * this.actors[i].radius + this.actors[i].y;
 						
 						if (this.player){
 							this.actors[i].attack();
 						}
-					}
 					
 					//If actor is the player, adjust its aim position
 					//based on its velocity
-					if (this.actors[i] == this.player){
+					} else if (this.actors[i] == this.player){
 						this.actors[i].turret_pos.x=(this.actors[i].aim_pos.x - this.actors[i].x);
 						this.actors[i].turret_pos.y=(this.actors[i].aim_pos.y - this.actors[i].y);
 						this.actors[i].turret_pos.normalize();
@@ -569,7 +561,7 @@ class Stage {
 						this.actors[i].aim_pos.y += this.actors[i].velocity.y;
 						
 						
-					}
+					} 
 					
 				} 
 					
@@ -921,6 +913,14 @@ class Opponent extends Ball {
 	
 	attack(){
 		
+		this.turret_pos.x=(this.aim_pos.x - this.x);
+		this.turret_pos.y=(this.aim_pos.y - this.y);
+		
+		this.turret_pos.normalize();
+		
+		this.turret_pos.x = this.turret_pos.x * this.radius + this.x;
+		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
+		
 		this.aim_pos = this.stage.player.position;
 		this.move_time--;
 		
@@ -935,7 +935,7 @@ class Opponent extends Ball {
 			
 			this.velocity = new Pair(new_x_vel, new_y_vel);
 		}
-		
+
 		
 		//Randomly shoot bullet from turret towards player
 		if (Math.floor(Math.random()*200) == 0){
@@ -956,6 +956,10 @@ class Opponent extends Ball {
 				
 			}
 		}
+		
+		console.log("This opp turret_pos: " + this.turret_pos + " position: " + this.position);
+		//console.log("Second opp turret_pos: " + stage.actors[1].turret_pos + " name: " + stage.actors[1].myClass);
+		//console.log("Third opp turret_pos: " + stage.actors[2].turret_pos + " name: " + stage.actors[2].myClass);
 		
 		
 		
@@ -1049,6 +1053,9 @@ function startGame(){
 	//messages.push(JSON.stringify(stage, getCircularReplacer()));
 	interval=setInterval(function(){ 
 		stage.step(); 
+		//console.log("First opp turret_pos: " + stage.actors[0].turret_pos + " name: " + stage.actors[0].myClass);
+		//console.log("Second opp turret_pos: " + stage.actors[1].turret_pos + " name: " + stage.actors[1].myClass);
+		//console.log("Third opp turret_pos: " + stage.actors[2].turret_pos + " name: " + stage.actors[2].myClass);
 		var message = [];        
 		message.push(stage);
 		wss.broadcast(JSON.stringify(stage, getCircularReplacer()));
@@ -1143,6 +1150,27 @@ wss.on('connection', function(ws) {
 			if (stage.player){
 				stage.player.headTo(new Pair(PlayerHeadTo.x, PlayerHeadTo.y));
 				stage.player.velocity.multiply(3);
+				
+				for (var i = 1; i < JSON.parse(message).length; i++){
+					stage.player.aim_pos = (new Pair(JSON.parse(message)[i].x, JSON.parse(message)[i].y));
+					
+					if (stage.player.turret_pos.x>=0 && stage.player.turret_pos.x<=stage.width &&
+					stage.player.turret_pos.y>=0 && stage.player.turret_pos.y<=stage.height){
+						
+						//If player has ammo, shoot a bullet from turret, decrease ammo count
+						if (stage.player.ammo > 0){
+							
+							var bullet_pos_x = stage.player.turret_pos.x;
+							var bullet_pos_y = stage.player.turret_pos.y + 1;
+							stage.addActor(new Bullet(stage, "Bullet", new Pair(bullet_pos_x, bullet_pos_y), stage.player.aim_pos,
+														new Pair(0, 0), 'rgba(0,255,0,1)', 3, "Player", 
+														stage.player.gunType));
+							stage.player.ammo--;
+
+						}
+					}
+					
+				}
 			}
 			
 		} else {
