@@ -79,34 +79,31 @@ export class Instructions extends Component {
                             </p>
                         </div>
                     ) : (<body></body>) }
+
                     { this.state.viewControls ? (
                     <div class="instructions_section" id="controls">
-                    <h3>Controls</h3>
-                    <p>Move with WASD
-                        <br/>Press P to pause
-                        <br/><br/>Aim the turret with the mouse
-                        <br/>Click the left mouse button to shoot
+                        <h3>Controls</h3>
+                        <p>Move with WASD
+                            <br/>Press P to pause
+                            <br/><br/>Aim the turret with the mouse
+                            <br/>Click the left mouse button to shoot
+                        </p>
+                    </div>) : (<body></body>) }
 
-                    </p>
-                </div>) : (<body></body>) }
                     { this.state.viewGuns ? (
                      <div class="instructions_section" id="gunTypes">
-                     <h3>Gun Types</h3>
-                     <p>Move into numbered boxes to restore the ammo amount written on them, 
-                         <br/>but you can destroy the ammo by shooting boxes
-                         <br/><br/>Opaque boxes in the primary colors contain guns,
-                         <br/>these do not have numbers on them and cannot be destroyed
-                     </p>
-                     
-                     <p id="pistolText">Blue Pistol: Fires 1 bullet at average speed and lifetime</p>
-                     <p id="sniperText">Yellow Sniper: Fires 1 bullet at high speed and lifetime</p>
-                     <p id="shotgunText">Red Shotgun: Fires 3 bullets at low speed and lifetime</p>
-                 </div>) : (<body></body>) }
+                        <h3>Gun Types</h3>
+                        <p>Move into numbered boxes to restore the ammo amount written on them, 
+                            <br/>but you can destroy the ammo by shooting boxes
+                            <br/><br/>Opaque boxes in the primary colors contain guns,
+                            <br/>these do not have numbers on them and cannot be destroyed
+                        </p>
+                        <p id="pistolText">Blue Pistol: Fires 1 bullet at average speed and lifetime</p>
+                        <p id="sniperText">Yellow Sniper: Fires 1 bullet at high speed and lifetime</p>
+                        <p id="shotgunText">Red Shotgun: Fires 3 bullets at low speed and lifetime</p>
+                    </div>) : (<body></body>) }
 
-                    
-                    
-                    
-                   
+
                 </div>
             </div>
         )

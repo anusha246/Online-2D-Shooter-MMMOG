@@ -24,7 +24,7 @@ class Navigation extends Component {
             viewLogin: !props.isLoggedIn,
             viewProfile: false,
             viewInstructions: false,
-            viewStatistics: false,
+            viewLeaderboard: false,
         };
     }
 
@@ -44,6 +44,13 @@ class Navigation extends Component {
                 console.log(err);
             });
         this.handlePlayClick()
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        this.handleLeaderboardClick()
             .then(res => {
                 console.log(res);
             })
@@ -80,7 +87,7 @@ class Navigation extends Component {
             this.setState({ score: body.score });
             this.setState({ viewLogin: false });
             this.setState({ viewProfile: true });
-            this.setState({ viewStatistics: false });
+            this.setState({ viewLeaderboard: false });
             this.setState({ viewInstructions: false });
             console.log(body);
         }
@@ -92,11 +99,19 @@ class Navigation extends Component {
         return body;
 	};
 
+    handleLeaderboardClick = async e => {
+		e.preventDefault();
+        this.setState({ viewLogin: false });
+        this.setState({ viewProfile: false });
+        this.setState({ viewLeaderboard: true });
+        this.setState({ viewInstructions: false });
+    }
+
     handlePlayClick = async e => {
 		e.preventDefault();
         this.setState({ viewLogin: false });
         this.setState({ viewProfile: false });
-        this.setState({ viewStatistics: false });
+        this.setState({ viewLeaderboard: false });
         this.setState({ viewInstructions: false });
     }
 
@@ -104,7 +119,7 @@ class Navigation extends Component {
 		e.preventDefault();
         this.setState({ viewLogin: false });
         this.setState({ viewProfile: false });
-        this.setState({ viewStatistics: false });
+        this.setState({ viewLeaderboard: false });
         this.setState({ viewInstructions: true });
     }
 
@@ -112,7 +127,7 @@ class Navigation extends Component {
 		e.preventDefault();
         this.setState({ viewLogin: true });
         this.setState({ viewProfile: false });
-        this.setState({ viewStatistics: false });
+        this.setState({ viewLeaderboard: false });
         this.setState({ viewInstructions: false });
 
     }
@@ -126,11 +141,12 @@ class Navigation extends Component {
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="mr-auto">
                         <Nav.Link href="#play" onClick = {this.handlePlayClick}>Play</Nav.Link>
+                        <Nav.Link href="#stats" onClick = {this.handleLeaderboardClick} >Leaderboard</Nav.Link>
                         <Nav.Link href="#profile" onClick = {this.handleProfileClick}>Profile</Nav.Link>
                         <Nav.Link href="#instructions" onClick = {this.handleInstructionsClick}>Instructions</Nav.Link>
 
                         <NavDropdown title="Instructions" id="collasible-nav-dropdown">
-                            <NavDropdown.Item href="#action/3.1">Statistics</NavDropdown.Item>
+                            <NavDropdown.Item href="#action/3.1">Leaderboard</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.2">Profile</NavDropdown.Item>
                             <NavDropdown.Item href="#action/3.3">Logout</NavDropdown.Item>
                             <NavDropdown.Divider />
