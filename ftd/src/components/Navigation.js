@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
+import Profile from './Profile.js';
+import Instructions from './Instructions.js';
+
 //import * as ReactBootstrap from "react-bootstrap";
 
 
@@ -18,22 +21,42 @@ class Navigation extends Component {
             lastName: '',
             score: 0,
             responseToPost: '',
+            viewLogin: !props.isLoggedIn,
             viewProfile: false,
             viewInstructions: false,
             viewStatistics: false,
-
-            
         };
     }
 
 	componentDidMount() {
 		this.handleProfileClick()
-        .then(res => {
-            console.log(res);
-        })
-        .catch(err => {
-            console.log(err);
-        });
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        this.handleInstructionsClick()
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        this.handlePlayClick()
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        this.handleLogoutClick()
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+            });
 	}
     
 	handleProfileClick = async e => {
@@ -50,13 +73,15 @@ class Navigation extends Component {
 		});
         const body = await response.json();
         if (response.status === 200) {
-            this.setState({ viewProfile: true });
             this.setState({ email: body.email });
             this.setState({ username: body.username });
             this.setState({ firstName: body.firstname });
             this.setState({ lastName: body.lastname });
             this.setState({ score: body.score });
-
+            this.setState({ viewLogin: false });
+            this.setState({ viewProfile: true });
+            this.setState({ viewStatistics: false });
+            this.setState({ viewInstructions: false });
             console.log(body);
         }
 		else if (response.status !== 200) {
@@ -67,24 +92,29 @@ class Navigation extends Component {
         return body;
 	};
 
-    handleStatisticsClick = async e => {
-		e.preventDefault();
-        this.setState({ viewProfile: false });
-    }
-
     handlePlayClick = async e => {
 		e.preventDefault();
+        this.setState({ viewLogin: false });
         this.setState({ viewProfile: false });
+        this.setState({ viewStatistics: false });
+        this.setState({ viewInstructions: false });
     }
 
     handleInstructionsClick = async e => {
 		e.preventDefault();
+        this.setState({ viewLogin: false });
         this.setState({ viewProfile: false });
+        this.setState({ viewStatistics: false });
+        this.setState({ viewInstructions: true });
     }
 
     handleLogoutClick = async e => {
 		e.preventDefault();
+        this.setState({ viewLogin: true });
         this.setState({ viewProfile: false });
+        this.setState({ viewStatistics: false });
+        this.setState({ viewInstructions: false });
+
     }
 
 
@@ -96,7 +126,6 @@ class Navigation extends Component {
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="mr-auto">
                         <Nav.Link href="#play" onClick = {this.handlePlayClick}>Play</Nav.Link>
-                        <Nav.Link href="#stats" onClick = {this.handleStatisticsClick} >Statistics</Nav.Link>
                         <Nav.Link href="#profile" onClick = {this.handleProfileClick}>Profile</Nav.Link>
                         <Nav.Link href="#instructions" onClick = {this.handleInstructionsClick}>Instructions</Nav.Link>
 
@@ -114,33 +143,12 @@ class Navigation extends Component {
                 </Navbar.Collapse>
                 </Navbar>
                 <div>
-                    { 
-                    this.state.viewProfile ? (
-                        <div id="ui_profile">
-                        <h2>Profile</h2>
-                        <div>
-                            <b id = "profileUsername">Username: { this.state.username } </b><br/>
-                            <div id = "changeUsernameField">
-                                <input type="text" id="changeUsername" placeholder = "New Username"/>
-                                <input type="submit" id="changeUsernameButton" value="Change Username"/>
-                            </div>
-                            <b id = "profilePassword">Password: <span>&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;</span> </b><br/>
-                            <b id = "profileEmail">Email: { this.state.email } </b><br/>
-                            <div id = "changeEmailField">
-                                <input type="text" id="changeEmail" placeholder = "New Email"/>
-                                <input type="submit" id="changeEmailButton" value="Change Email"/>
-                            </div>
-                            <b id = "profileFirstName">First Name: { this.state.firstName } </b><br/>
-                            <b id = "profileLastName">Last Name: { this.state.lastName }</b><br/>
-                            <b id = "profileScore">Score: { this.state.score }</b><br/>
-                            <div id = "deleteUserField">
-                                <input type="submit" id="deleteUserButton" value="Delete User"/>
-                            </div>
-                        </div>
-                    </div>
-                    ) : (
-                        <body></body>
-                    ) }
+                    { this.state.viewProfile ? 
+                    (<Profile username = {this.state.username} password = {this.state.password}
+                    email = {this.state.email} score = {this.state.score} firstName = {this.state.firstName}
+                    lastName = {this.state.lastName}/>) : (<body></body>) }
+
+                    { this.state.viewInstructions ? (<Instructions/>) : (<body></body>) }
                 </div>
             </div>
         );

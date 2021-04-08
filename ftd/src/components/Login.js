@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Play from './Play';
+import Navigation from './Navigation.js';
 
 
 export class Login extends Component {
@@ -61,7 +61,8 @@ export class Login extends Component {
         <div className="App">
         { 
             this.state.isLoggedIn ? (
-                <Play username = {this.state.username} password = {this.state.password} />
+                <Navigation username = {this.state.username} password = {this.state.password}
+                isLoggedIn = {this.state.isLoggedIn}/>
             ) : (
                 <body>
                 <h1>f0rt9it32d</h1>
