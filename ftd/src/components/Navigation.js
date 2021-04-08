@@ -26,6 +26,9 @@ class Navigation extends Component {
             viewInstructions: false,
             viewLeaderboard: false,
         };
+
+        this.stateHandler = this.stateHandler.bind(this);
+
     }
 
 	componentDidMount() {
@@ -132,6 +135,12 @@ class Navigation extends Component {
 
     }
 
+    stateHandler(name) {
+        this.setState({
+          username: name
+        })
+      }
+
 
     render() {
         return (
@@ -162,7 +171,7 @@ class Navigation extends Component {
                     { this.state.viewProfile ? 
                     (<Profile username = {this.state.username} password = {this.state.password}
                     email = {this.state.email} score = {this.state.score} firstName = {this.state.firstName}
-                    lastName = {this.state.lastName}/>) : (<body></body>) }
+                    lastName = {this.state.lastName} handler = {this.stateHandler}/>) : (<body></body>) }
 
                     { this.state.viewInstructions ? (<Instructions/>) : (<body></body>) }
                 </div>
