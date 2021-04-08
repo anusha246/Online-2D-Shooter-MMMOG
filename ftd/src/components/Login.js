@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import Play from './Play';
 
 
@@ -42,9 +42,6 @@ export class Login extends Component {
         const body = await response.json();
         if (response.status === 200) {
             this.setState({ responseToPost: body.message });
-
-            this.setState({ password: '' });
-            this.setState({ username: '' });
             this.setState({ isLoggedIn: true });
             console.log(body);
         }
@@ -64,7 +61,7 @@ export class Login extends Component {
         <div className="App">
         { 
             this.state.isLoggedIn ? (
-                <Play/>
+                <Play username = {this.state.username} password = {this.state.password} />
             ) : (
                 <body>
                 <h1>f0rt9it32d</h1>
