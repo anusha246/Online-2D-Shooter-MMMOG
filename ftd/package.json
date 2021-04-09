@@ -2,7 +2,7 @@
   "name": "ftd",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8000/",
+  "proxy": "http://192.168.50.197:8000/",
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@testing-library/jest-dom": "^5.11.10",
