@@ -1,11 +1,12 @@
 {
   "name": "2d-shooter-mmmog",
   "version": "1.0.0",
-  "description": "",
   "main": "authorization.js",
   "dependencies": {
     "express": "^4.17.1",
-    "pg": "^8.5.1"
+    "pg": "^8.5.1",
+    "request": "^2.88.2",
+    "ws": "^7.4.4"
   },
   "devDependencies": {},
   "scripts": {
@@ -20,5 +21,6 @@
   "bugs": {
     "url": "https://github.com/anusha246/2D-Shooter-MMMOG/issues"
   },
-  "homepage": "https://github.com/anusha246/2D-Shooter-MMMOG#readme"
+  "homepage": "https://github.com/anusha246/2D-Shooter-MMMOG#readme",
+  "description": ""
 }
