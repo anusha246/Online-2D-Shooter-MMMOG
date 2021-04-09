@@ -336,9 +336,9 @@ app.use('/api/register', function (req, res,next) {
 			} else if(pgRes.rowCount >= 1){
 				res.status(403).json({ error: 'User already exists. Please enter a unique username.'});
 			} else {
-				let sql_insert = 'INSERT INTO ftduser (username, password, email, firstname, lastname) \
-				VALUES ($1, sha512($2), $3, $4, $5)';
-				pool.query(sql_insert, [username, password, email, firstname, lastname], (err));
+				let sql_insert = 'INSERT INTO ftduser (username, password, email, firstname, lastname, score) \
+				VALUES ($1, sha512($2), $3, $4, $5, $6)';
+				pool.query(sql_insert, [username, password, email, firstname, lastname, 0], (err));
 				next(); 	
         	}
 		});
