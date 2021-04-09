@@ -10,12 +10,15 @@ var loggedIn = false;
 var socket;
 var context;
 var allClients = {};
-var player;
+var myPlayer;
 
 var viewWidth;
 var viewHeight;
 var camX;
 var camY;
+
+var isClientPlaying = true;
+
 
 function setupGame(){
 
@@ -132,7 +135,7 @@ function updateTouch (eventType, event) {
 		socket.send(JSON.stringify([]));
 	}
 
-	if (player){
+	if (myPlayer){
 		//relative to the viewport
 		var rect = canvas.getBoundingClientRect();
 		
@@ -141,14 +144,17 @@ function updateTouch (eventType, event) {
 		//if (!stage.isGameDone){
 			for (var i = 0; i < event.touches.length ; i++) {
 					var touch = event.touches[i];
-				touches.push({"x": (touch.clientX - rect.left) / (rect.right - rect.left) * stage.width + player.x - stage.width/2, 
-								"y":(touch.clientY - rect.top) / (rect.bottom - rect.top) * stage.height + player.y - stage.height/2 });
+				touches.push({"x": (touch.clientX - rect.left) / (rect.right - rect.left) * stage.width + myPlayer.x - stage.width/2, 
+								"y":(touch.clientY - rect.top) / (rect.bottom - rect.top) * stage.height + myPlayer.y - stage.height/2 });
 			}
 		//}
 		
 		console.log(JSON.stringify(touches));
 		socket.send(JSON.stringify(touches));
 	}
+	
+	
+	//isClientPlaying = true;
 }
 
 function drawBox(box){
@@ -220,12 +226,16 @@ function drawPlayer(player){
 	context.textAlign = "center";
 	context.fillText(player.health, player.x, player.y+6);
 	
-	//Show player score
-	context.font = "17px Courier New";
-	context.fillStyle = "black";
-	context.textAlign = "left";
-	context.fillText("Score: " + player.score, player.x - view_width/2 + 10, 
-						player.y - view_height/2 + 20);
+	
+	//Show player score only if this client's player
+	if (player.position.x == myPlayer.position.x && 
+		player.position.y == myPlayer.position.y){
+		context.font = "17px Courier New";
+		context.fillStyle = "black";
+		context.textAlign = "left";
+		context.fillText("Score: " + player.score, player.x - view_width/2 + 10, 
+							player.y - view_height/2 + 20);
+	}
 		
 	
 }
@@ -303,7 +313,7 @@ function update(){
 	
 	
 		
-		if (stage.isGameDone){
+		if (!myPlayer){
 			
 			//Set background and font for game done screen on viewport
 			context.fillStyle = 'rgba(0,0,0,0.5)';
@@ -314,8 +324,8 @@ function update(){
 			context.fillStyle = "white";
 			context.textAlign = "center";
 			
-			//If player is dead, show Game Over (game loss) and score
-			if (player == null){
+			//If myPlayer is dead, show Game Over (game loss) and score
+			if (myPlayer == null){
 				context.fillText("Game Over", stage.midPosition.x, stage.midPosition.y);
 				context.fillText("Your score is " + stage.score, 
 									stage.midPosition.x, stage.midPosition.y + 30);
@@ -331,6 +341,8 @@ function update(){
 				context.fillText("Your score is " + stage.score, 
 									stage.midPosition.x, stage.midPosition.y + 60);
 			}
+			
+			isClientPlaying = false;
 				
 		//Game is not done
 		} else {
@@ -342,9 +354,9 @@ function update(){
 			console.log(stage.height);
 			
 			
-			//Set viewport position centered on player and translate to it
-			camX = -player.x + view_width / 2;
-			camY = -player.y + view_height / 2;
+			//Set viewport position centered on myPlayer and translate to it
+			camX = -myPlayer.x + view_width / 2;
+			camY = -myPlayer.y + view_height / 2;
 			
 			context.translate( camX, camY ); 
 			
@@ -965,16 +977,28 @@ $(function(){
 		alert("closed code:" + event.code + " reason:" +event.reason + " wasClean:"+event.wasClean);
 	};
 	socket.onmessage = function (event) {
+		
+		
 		//console.log(event.data);
-		stage=JSON.parse(event.data);
-		player = stage.player;
-		//player=JSON.parse(JSON.parse(event.data)[1]);
+		/*
+		if (JSON.parse(event.data) == "Start game"){
+			isClientPlaying = true;
+		} else {
+		*/	
+			
+		stage=JSON.parse(event.data)[0];
+		//myPlayer = stage.player;
+		myPlayer=JSON.parse(event.data)[1];
 		//console.log(stage);
 		//console.log(stage.actors[0].turret_pos);
 		//console.log(stage.actors[1].turret_pos);
 		//console.log(stage.actors[2].turret_pos);
 		//update();
-		requestAnimationFrame(update);
+		//}
+		
+		if (isClientPlaying){
+			requestAnimationFrame(update);
+		}
 	}
 		
 		

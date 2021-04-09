@@ -425,7 +425,8 @@ function rand(n){ return Math.random()*n; }
 class Stage {
 	constructor(){
 	
-		this.actors=[]; // all actors on this stage (monsters, player, boxes, ...)
+		this.actors=[]; // all actors on this stage (monsters, players, boxes, ...)
+		this.players = []; //all players on this stage
 		//this.player=null; // a special actor, the player
 		this.isGameDone = false;
 	
@@ -433,7 +434,7 @@ class Stage {
 		this.width=800;
 		this.height=800;
 		
-
+		this.score;
 		//Starter values for both player and opponents
 		var velocity = new Pair(0,0);
 		var radius = 18;
@@ -462,15 +463,6 @@ class Stage {
 										move_time, gunType));
 		}
 		
-		//Create player
-		var score = 0;
-		this.midPosition = new Pair(Math.floor(this.width/2), Math.floor(this.height/2));
-		var colour= 'rgba(0,0,0,1)';
-		
-		this.score = score;
-		this.player = new Player(this, "Player", this.midPosition, velocity, colour, radius,
-			                                                                        aim_pos, turret_pos, health, ammo, score, gunType);
-		this.addPlayer(this.player);
 		
 		
 		
@@ -481,14 +473,43 @@ class Stage {
 		
 	}
 
-	addPlayer(player){
+	addPlayer(colour){
+		//Create player
+		
+		var velocity = new Pair(0,0);
+		var radius = 18;
+		this.midPosition = new Pair(Math.floor((Math.random()*this.width)), 
+									Math.floor((Math.random()*this.height)));
+		var aim_pos = this.midPosition;
+		var turret_pos = new Pair(this.midPosition.x, this.midPosition.y - radius);
+		var health = 10;
+		var ammo = 10;
+		var gunType = "Pistol";
+		
+		var score = 0;
+		var colour= colour;
+		
+		
+		var player = new Player(this, "Player", this.midPosition, velocity, colour, radius,
+								aim_pos, turret_pos, health, ammo, score, gunType);
+		
+		
+		
 		this.addActor(player);
+		this.players.push(player);
 		//this.player = player;
 	}
+	
+	/*
+	noPlayers(){
+		
+	}
+	*/
 
-	removePlayer(){
-		this.removeActor(this.player);
-		this.player=null;
+	removePlayer(player){
+		this.players[this.players.indexOf(player)] = null;
+		this.removeActor(player);
+		//this.player=null;
 	}
 
 	addActor(actor){
@@ -522,17 +543,26 @@ class Stage {
 							
 						shouldStep = false;
 						
+						/*
 						//If a bullet hits a player or opponent it was not shot from
 						if (this.actors[i].constructor.name == "Bullet" &&
 							this.actors[j].constructor.name != "Box" &&
 							this.actors[i].shotFrom != this.actors[j].constructor.name){
 							
 							//If bullet was shot from player, update player score
-							if (this.player && this.actors[i].shotFrom == "Player") {
-								this.player.score++;
-								updateScore(this.player.score);
+							if (this.actors[i].shotFrom.substring(0, 6) == "Player") {
+								if (this.players[parseInt(this.actors[i].shotFrom.substring(6, 
+															this.actors[i].shotFrom.length))]){
+									
+									this.players[parseInt(this.actors[i].shotFrom.substring(6, 
+													this.actors[i].shotFrom.length))].score++;
+								}									
+								//this.player.score++;
+								//updateScore(this.player.score);
 							}
 						}
+						*/
+						
 						break;
 					}
 				}
@@ -543,13 +573,19 @@ class Stage {
 					
 					if (this.actors[i].constructor.name == "Opponent"){
 						
-						if (this.player){
-							this.actors[i].attack();
+						for (var j=0; j<this.players.length; j++){
+							if (this.players[j]){
+								this.actors[i].attack(this.players[j]);
+							}
 						}
 					
-					//If actor is the player, adjust its aim position
+					//If actor is a player, adjust its aim position
 					//based on its velocity
-					} else if (this.actors[i] == this.player){
+					} else if (this.actors[i].myClass == "Player"){
+						
+						this.actors[i].aim_pos.x += this.actors[i].velocity.x;
+						this.actors[i].aim_pos.y += this.actors[i].velocity.y;
+						
 						this.actors[i].turret_pos.x=(this.actors[i].aim_pos.x - this.actors[i].x);
 						this.actors[i].turret_pos.y=(this.actors[i].aim_pos.y - this.actors[i].y);
 						this.actors[i].turret_pos.normalize();
@@ -557,11 +593,10 @@ class Stage {
 						this.actors[i].turret_pos.x = this.actors[i].turret_pos.x * this.actors[i].radius + this.actors[i].x;
 						this.actors[i].turret_pos.y = this.actors[i].turret_pos.y * this.actors[i].radius + this.actors[i].y;
 						
-						this.actors[i].aim_pos.x += this.actors[i].velocity.x;
-						this.actors[i].aim_pos.y += this.actors[i].velocity.y;
 						
 						
 					} 
+					
 					
 				} 
 					
@@ -585,11 +620,11 @@ class Stage {
 				if (this.actors[i].health <= 0){
 					
 					//Save score and position in case of player death
-					this.score = this.player.score;
-					this.midPosition = this.player.position;
+					this.score = this.actors[i].score;
+					this.midPosition = this.actors[i].position;
 					
 					//Remove player or opponent whose health is 0
-					if (this.actors[i] == this.player){
+					if (this.actors[i].myClass == "Player"){
 						this.removePlayer(this.actors[i]);
 					} else {
 						this.removeActor(this.actors[i]);
@@ -603,6 +638,7 @@ class Stage {
 				this.generateBoxes(this.numBoxes);
 			} 
 			
+			/*
 			//If there is no player or no opponents on canvas, game is done
 			if (this.player == null || 
 				!this.actors.some(Object => Object.constructor.name == "Opponent")){
@@ -610,7 +646,7 @@ class Stage {
 				this.isGameDone = true;
 				break;
 			} 
-			
+			*/
 			
 		}
 		
@@ -823,8 +859,31 @@ class Ball {
 						//If bullet was not shot from object, decrease 
 						//object health and expire Bullet
 						} else if (object.constructor.name != this.shotFrom){
-							object.health--;
-							this.lifetime = 0;
+							if (object.myClass == "Player" && this.shotFrom.substring(0, 6) == "Player"){
+								
+								console.log("Both Player");
+								if (stage.players.indexOf(object) != parseInt(this.shotFrom.substring(6, 
+																		this.shotFrom.length))){
+									console.log("Decrease health");
+									stage.players[parseInt(this.shotFrom.substring(6, 
+													this.shotFrom.length))].score++;
+									object.health--;
+									this.lifetime = 0;
+								}
+								
+								
+									
+							} else {
+								if (this.shotFrom.substring(0, 6) == "Player"){
+									stage.players[parseInt(this.shotFrom.substring(6, 
+													this.shotFrom.length))].score++;	
+								}
+								
+								
+								object.health--;
+								this.lifetime = 0;
+								
+							}
 						} else {
 							return true;
 						}
@@ -911,7 +970,7 @@ class Opponent extends Ball {
 		this.gunType = gunType;
 	}
 	
-	attack(){
+	attack(player){
 		
 		this.turret_pos.x=(this.aim_pos.x - this.x);
 		this.turret_pos.y=(this.aim_pos.y - this.y);
@@ -921,7 +980,7 @@ class Opponent extends Ball {
 		this.turret_pos.x = this.turret_pos.x * this.radius + this.x;
 		this.turret_pos.y = this.turret_pos.y * this.radius + this.y;
 		
-		this.aim_pos = this.stage.player.position;
+		this.aim_pos = player.position;
 		this.move_time--;
 		
 		//If move_time expired, set new random one, new random velocity
@@ -947,7 +1006,7 @@ class Opponent extends Ball {
 				var bullet_pos_y = this.turret_pos.y + 1;
 				
 				this.stage.addActor(new Bullet(this.stage, "Bullet", new Pair(bullet_pos_x, bullet_pos_y), 
-											this.stage.player.position, new Pair(0, 0), 
+											player.position, new Pair(0, 0), 
 											'rgba(255,0,0,1)', 3,
 											"Opponent", this.gunType));
 											
@@ -957,7 +1016,7 @@ class Opponent extends Ball {
 			}
 		}
 		
-		console.log("This opp turret_pos: " + this.turret_pos + " position: " + this.position);
+		//console.log("This opp turret_pos: " + this.turret_pos + " position: " + this.position);
 		//console.log("Second opp turret_pos: " + stage.actors[1].turret_pos + " name: " + stage.actors[1].myClass);
 		//console.log("Third opp turret_pos: " + stage.actors[2].turret_pos + " name: " + stage.actors[2].myClass);
 		
@@ -1056,10 +1115,10 @@ function startGame(){
 		//console.log("First opp turret_pos: " + stage.actors[0].turret_pos + " name: " + stage.actors[0].myClass);
 		//console.log("Second opp turret_pos: " + stage.actors[1].turret_pos + " name: " + stage.actors[1].myClass);
 		//console.log("Third opp turret_pos: " + stage.actors[2].turret_pos + " name: " + stage.actors[2].myClass);
-		var message = [];        
-		message.push(stage);
-		wss.broadcast(JSON.stringify(stage, getCircularReplacer()));
-		messages.push(JSON.stringify(stage, getCircularReplacer()));
+		
+		wss.broadcast(stage);
+		//wss.broadcast(JSON.stringify(stage, getCircularReplacer()));
+		//messages.push(JSON.stringify(stage, getCircularReplacer()));
 	}, 10);
 	
 	
@@ -1086,7 +1145,14 @@ wss.on('close', function() {
 
 wss.broadcast = function(message){
 	for(let ws of this.clients){ 
-		ws.send(message); 
+		var toSend = [];        
+		toSend.push(stage);
+		//toSend.push(JSON.stringify(stage.players[ws.clientNum], getCircularReplacer()));
+		toSend.push(stage.players[ws.clientNum]);
+		//console.log(ws.clientNum);
+		//if (stage.players[ws.clientNum]){
+		ws.send(JSON.stringify(toSend, getCircularReplacer())); 
+		//}
 	}
 
 	// Alternatively
@@ -1121,9 +1187,12 @@ wss.on('connection', function(ws) {
 	var green = Math.round(Math.random()*255);
 	var blue = Math.round(Math.random()*255);
 	
+	ws.colour = `rgba(${red},${green},${blue},1)`;
+	
 	ws.clientNum = j;
 	j++;
 	
+	stage.addPlayer(ws.colour);
 	
 	
 
@@ -1138,7 +1207,14 @@ wss.on('connection', function(ws) {
 		//console.log("Parsed message: " + JSON.parse(message)[0].x);
 		
 		//console.log("Got message: "+ JSON.parse(message));
-
+		/*
+		if (!stage.players[ws.clientNum]){
+			stage.addPlayer(ws.colour);
+			ws.send(JSON.stringify("Start game"));
+		}
+		*/
+		
+			
 		if (!interval){
 			startGame();
 			console.log("Started game");
@@ -1147,25 +1223,25 @@ wss.on('connection', function(ws) {
 		if (JSON.parse(message)[0]){
 			var PlayerHeadTo = JSON.parse(message)[0];
 		
-			if (stage.player){
-				stage.player.headTo(new Pair(PlayerHeadTo.x, PlayerHeadTo.y));
-				stage.player.velocity.multiply(3);
+			if (stage.players[ws.clientNum]){
+				stage.players[ws.clientNum].headTo(new Pair(PlayerHeadTo.x, PlayerHeadTo.y));
+				stage.players[ws.clientNum].velocity.multiply(3);
 				
 				for (var i = 1; i < JSON.parse(message).length; i++){
-					stage.player.aim_pos = (new Pair(JSON.parse(message)[i].x, JSON.parse(message)[i].y));
+					stage.players[ws.clientNum].aim_pos = (new Pair(JSON.parse(message)[i].x, JSON.parse(message)[i].y));
 					
-					if (stage.player.turret_pos.x>=0 && stage.player.turret_pos.x<=stage.width &&
-					stage.player.turret_pos.y>=0 && stage.player.turret_pos.y<=stage.height){
+					if (stage.players[ws.clientNum].turret_pos.x>=0 && stage.players[ws.clientNum].turret_pos.x<=stage.width &&
+					stage.players[ws.clientNum].turret_pos.y>=0 && stage.players[ws.clientNum].turret_pos.y<=stage.height){
 						
 						//If player has ammo, shoot a bullet from turret, decrease ammo count
-						if (stage.player.ammo > 0){
+						if (stage.players[ws.clientNum].ammo > 0){
 							
-							var bullet_pos_x = stage.player.turret_pos.x;
-							var bullet_pos_y = stage.player.turret_pos.y + 1;
-							stage.addActor(new Bullet(stage, "Bullet", new Pair(bullet_pos_x, bullet_pos_y), stage.player.aim_pos,
-														new Pair(0, 0), 'rgba(0,255,0,1)', 3, "Player", 
-														stage.player.gunType));
-							stage.player.ammo--;
+							var bullet_pos_x = stage.players[ws.clientNum].turret_pos.x;
+							var bullet_pos_y = stage.players[ws.clientNum].turret_pos.y + 1;
+							stage.addActor(new Bullet(stage, "Bullet", new Pair(bullet_pos_x, bullet_pos_y), stage.players[ws.clientNum].aim_pos,
+														new Pair(0, 0), 'rgba(0,255,0,1)', 3, "Player" + ws.clientNum, 
+														stage.players[ws.clientNum].gunType));
+							stage.players[ws.clientNum].ammo--;
 
 						}
 					}
@@ -1174,8 +1250,8 @@ wss.on('connection', function(ws) {
 			}
 			
 		} else {
-			if (stage.player){
-				stage.player.velocity = new Pair(0, 0);
+			if (stage.players[ws.clientNum]){
+				stage.players[ws.clientNum].velocity = new Pair(0, 0);
 			}
 		}
 		//startGame();
@@ -1208,6 +1284,7 @@ wss.on('connection', function(ws) {
 
 	ws.on("close", () => {
 		console.log("client disconnected");
+		stage.removePlayer(stage.players[ws.clientNum]);
 	});
 });
 
