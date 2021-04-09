@@ -27,6 +27,7 @@ class Navigation extends Component {
             viewProfile: false,
             viewInstructions: false,
             viewLeaderboard: false,
+            viewPlay: false,
         };
 
         this.nameHandler = this.nameHandler.bind(this);
@@ -126,8 +127,9 @@ class Navigation extends Component {
         this.setState({ 
             viewLogin: false,
             viewProfile: false,
-            viewLeaderboard: true,
+            viewLeaderboard: false,
             viewInstructions: false,
+            viewPlay: true,
         });
     }
 

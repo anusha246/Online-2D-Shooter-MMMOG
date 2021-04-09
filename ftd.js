@@ -96,6 +96,45 @@ app.use('/api/auth/login', function (req, res,next) {
 	}
 });
 
+app.use('/api/auth/play', function (req, res,next) {
+
+	//Verify that the correct method and headers are being received
+	if (!req.method || req.method != "PUT") {
+		return res.status(403).json({ error: 'Invalid method type for playing game request' });
+	}
+	if (!req.headers.username || !req.headers.password) {
+		return res.status(403).json({ error: 'User not authenticated to play game' });
+  	}
+
+	try {
+		//Regex match the username and password to a valid username and password.
+		//That is, usernames are only digits and alphabet letters. Passwords are special characters & letters. 
+		/*var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString();
+		u = /(([\w])*)$/.exec(uname) //Only A-Z, a-z, 0-9, and the underscore
+		var p = /(([\w]|[\W])*)$/.exec(req.headers.password);
+		var pword = Buffer.from(p[1], 'base64').toString();
+		p = /(([\w]|[\W])*)$/.exec(pword); //Alphabet, digits, and any special character
+		
+		var username = u[1];
+		var password = p[1];*/
+
+		//Query database for specified username and password
+		let sql = 'SELECT * FROM ftduser WHERE username=$1 and password=sha512($2)';
+        pool.query(sql, [username, password], (err, pgRes) => {
+  			if (err){
+                res.status(403).json({ error: 'Your username or password is incorrect.'});
+			} else if(pgRes.rowCount == 1){
+				next(); 
+			} else {
+                res.status(403).json({ error: 'Your username or password is incorrect.'});
+        	}
+		});
+	} catch(err) {
+               	res.status(403).json({ error: 'Your username or password is incorrect.'});
+	}
+});
+
 app.use('/api/auth/profile', function (req, res,next) {
 	
 	//Verify that the correct method and headers are being received
@@ -384,6 +423,11 @@ app.use('/api/auth/delete', function (req, res, next) {
 
 // All routes below /api/auth require credentials 
 app.post('/api/auth/login', function (req, res) {
+	res.status(200); 
+	res.json({"message":"authentication success"}); 
+});
+
+app.put('/api/auth/play', function (req, res) {
 	res.status(200); 
 	res.json({"message":"authentication success"}); 
 });
