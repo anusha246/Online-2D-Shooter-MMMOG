@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Navigation from './Navigation.js';
 import Register from './Register.js';
+import { Button } from '@material-ui/core';
+
 
 export class Login extends Component {
     
@@ -121,8 +123,8 @@ export class Login extends Component {
                                 onChange = {e => this.setState({ username: e.target.value }) }/>
                                 <input type="password" id="password" placeholder="Password" value = {this.state.password}
                                 onChange = {e => this.setState({ password: e.target.value }) }/>
-                                <button type="submit" id="loginSubmit" value="Login"
-                                onClick = {this.handleSubmit}>Login</button>
+                                <Button variant="contained" color="primary"
+                                onClick = {this.handleSubmit}>Login</Button>
                             </form>
                             <p>{this.state.responseToPost}</p>
                             </div>

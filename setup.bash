@@ -33,5 +33,6 @@ nodejs ftd.js
 #nodejs ftd.js #?? <-- required?
 #npm cache clean --force
 #npm install
+#npm install ws
 #require('ws'); need to update setup.bash
 #npm start #<-- start react

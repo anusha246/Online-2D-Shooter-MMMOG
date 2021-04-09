@@ -929,7 +929,7 @@ $(function(){
 	$("#ui_profile").hide();
 	
 	//Websocket stuff
-	
+	console.log(`ws://${window.location.hostname}:8001`);
 	socket = new WebSocket(`ws://${window.location.hostname}:8001`);
 	socket.onopen = function (event) {
 		console.log("connected");
