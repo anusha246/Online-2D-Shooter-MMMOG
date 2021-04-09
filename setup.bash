@@ -26,13 +26,13 @@ nodejs ftd.js
 #npm init
 #npm install express
 #npm install pg
+#npm install ws
+#npm install axios
 #npm install react-bootstrap bootstrap
 #npm install @material-ui/core
-#npm install axios
 #psql "dbname='webdb' user='webdbuser' password='password' host='localhost'" -f db/schema.sql
 #nodejs ftd.js #?? <-- required?
 #npm cache clean --force
 #npm install
-#npm install ws
 #require('ws'); need to update setup.bash
 #npm start #<-- start react
