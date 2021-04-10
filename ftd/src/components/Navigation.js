@@ -3,7 +3,8 @@ import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import Profile from './Profile.js';
 import Instructions from './Instructions.js';
 import Login from './Login.js';
-
+import Play from './Play.js';
+import Leaderboard from './Leaderboard.js';
 
 //import * as ReactBootstrap from "react-bootstrap";
 
@@ -21,13 +22,15 @@ class Navigation extends Component {
             firstName: '',
             lastName: '',
             score: 0,
+            rows: [],
+            rowCount: 0,
             responseToPost: '',
             viewNavbar: props.viewNavbar,
             viewLogin: !props.isLoggedIn,
             viewProfile: false,
             viewInstructions: false,
             viewLeaderboard: false,
-            viewPlay: false,
+            viewPlay: true,
         };
 
         this.nameHandler = this.nameHandler.bind(this);
@@ -96,6 +99,7 @@ class Navigation extends Component {
                 firstName: body.firstname, 
                 lastName: body.lastname, 
                 score: body.score, 
+                viewPlay: false,
                 viewLogin: false,
                 viewProfile: true,
                 viewLeaderboard: false,
@@ -112,30 +116,55 @@ class Navigation extends Component {
 	};
 
     handleLeaderboardClick = async e => {
-		e.preventDefault();
-        this.setState({ 
-            viewLogin: false,
-            viewProfile: false,
-            viewLeaderboard: true,
-            viewInstructions: false,
-        });
+        e.preventDefault();
+        const response = await fetch('/api/auth/getScores', {
+            method: "GET",
+            data: JSON.stringify({}),
+            headers: {
+                "GET": "Profile information", "username" : btoa(this.state.newUsername),
+            },
+            processData:false,
+            contentType: "application/json; charset=utf-8",
+            dataType:"json"
+		});
+        const body = await response.json();
+        if (response.status === 200) {
 
+            this.setState({ 
+                rows:body.message.toString(),
+                rowCount:body.message.playerCount,
+                viewPlay: false,
+                viewLogin: false,
+                viewProfile: false,
+                viewLeaderboard: true,
+                viewInstructions: false,
+                responseToPost: '',
+            });
+            console.log(body);
+        }
+		else if (response.status !== 200) {
+            this.setState({ responseToPost: body.error });
+            console.log(body);
+			//throw Error(response);
+		}
+        return body;
     }
 
     handlePlayClick = async e => {
 		e.preventDefault();
         this.setState({ 
+            viewPlay: true,
             viewLogin: false,
             viewProfile: false,
             viewLeaderboard: false,
             viewInstructions: false,
-            viewPlay: true,
         });
     }
 
     handleInstructionsClick = async e => {
 		e.preventDefault();
         this.setState({ 
+            viewPlay: false,
             viewLogin: false,
             viewProfile: false,
             viewLeaderboard: false,
@@ -146,6 +175,7 @@ class Navigation extends Component {
     handleLogoutClick = async e => {
 		e.preventDefault();
         this.setState({ 
+            viewPlay: false,
             viewLogin: true,
             viewProfile: false,
             viewLeaderboard: false,
@@ -172,6 +202,7 @@ class Navigation extends Component {
             username : '', 
             email: '', 
             password: '',
+            viewPlay: false,
             viewProfile: false,
             viewLeaderboard: false,
             viewInstructions: false,
@@ -192,17 +223,9 @@ class Navigation extends Component {
                         <Navbar.Collapse id="responsive-navbar-nav">
                             <Nav className="mr-auto">
                                 <Nav.Link href="#play" onClick = {this.handlePlayClick}>Play</Nav.Link>
-                                <Nav.Link href="#stats" onClick = {this.handleLeaderboardClick} >Leaderboard</Nav.Link>
+                                <Nav.Link href="#leaderboard" onClick = {this.handleLeaderboardClick} >Leaderboard</Nav.Link>
                                 <Nav.Link href="#profile" onClick = {this.handleProfileClick}>Profile</Nav.Link>
                                 <Nav.Link href="#instructions" onClick = {this.handleInstructionsClick}>Instructions</Nav.Link>
-
-                                <NavDropdown title="Instructions" id="collasible-nav-dropdown">
-                                    <NavDropdown.Item href="#action/3.1">Leaderboard</NavDropdown.Item>
-                                    <NavDropdown.Item href="#action/3.2">Profile</NavDropdown.Item>
-                                    <NavDropdown.Item href="#action/3.3">Logout</NavDropdown.Item>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
-                                </NavDropdown>
                             </Nav>
                             <Nav>
                                 <Nav.Link href="#Logout" onClick = {this.handleLogoutClick}>Logout</Nav.Link>
@@ -220,6 +243,13 @@ class Navigation extends Component {
                 emailHandler = {this.emailHandler} deleteHandler = {this.deleteHandler}/>) : (<body></body>) }
 
                 { this.state.viewInstructions ? (<Instructions/>) : (<body></body>) }
+
+                { this.state.viewPlay ? (<Play username = {this.state.username} password = {this.state.password}
+                isLoggedIn = {this.state.isLoggedIn}/>) : (<body></body>) }
+
+                { this.state.viewLeaderboard ? (<Leaderboard username = {this.state.username} 
+                responseToPost = {this.state.responseToPost} rows = {this.state.rows}
+                rowCount = {this.state.rowCount} />) : (<body></body>) }
             </div>
         );
     }

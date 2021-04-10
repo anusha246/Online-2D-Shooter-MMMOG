@@ -2,21 +2,22 @@
   "name": "ftd",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://192.168.50.197:8000/",
+  "proxy": "http://localhost:8000/",
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^12.8.3",
     "axios": "^0.21.1",
+    "body-parser": "^1.18.3",
     "bootstrap": "^4.6.0",
+    "express": "^4.16.4",
+    "pg": "^8.5.1",
     "react": "^17.0.2",
     "react-bootstrap": "^1.5.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
-    "web-vitals": "^1.1.1",
-    "body-parser": "^1.18.3",
-    "express": "^4.16.4"
+    "web-vitals": "^1.1.1"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -12,14 +12,25 @@ npm init
 
 # We are adding libraries, they will be in our local node_modules
 
+echo "starting proxy server"
 npm install express
 npm install pg
+npm install ws
 
 # check out the package.json now
 # check out node_modules
 
 psql "dbname='webdb' user='webdbuser' password='password' host='localhost'" -f db/schema.sql
-nodejs ftd.js
+nodejs ftd.js &
+
+echo "starting react server"
+cd ftd/
+npm cache clear --force
+npm install 
+sudo npm start && 
+fg
+
+
 
 #NEW SETUP:
 #rm package*

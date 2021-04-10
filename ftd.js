@@ -5,6 +5,7 @@
 var port = 8000; 
 var webSocketPort = port+1;
 
+
 var express = require('express');
 var app = express();
 
@@ -172,6 +173,38 @@ app.use('/api/auth/updateScore', function (req, res,next) {
 		});
 	} catch(err) {
                	res.status(403).json({ error: 'Your username is invalid; cannot update score'});
+	}
+});
+app.use('/api/auth/getScores', function (req, res,next) {
+	
+	//Verify that the correct method and headers are being received
+	if (!req.method || req.method != "GET") {
+		return res.status(403).json({ error: 'Invalid method type, please use GET to view leaderboard' });
+	} else if (!req.headers.username) {
+		return res.status(403).json({ error: 'You must be authenticated to view leaderboards' });
+  	}
+
+	try {
+		//Regex match the username to a valid username.
+		//That is, usernames are only digits and alphabet letters. 
+		var u = /(([\w]|[\W])*)$/.exec(req.headers.username);
+		var uname = Buffer.from(u[1], 'base64').toString();
+		u = /(([\w])*)$/.exec(uname); //Only A-Z, a-z, 0-9, and the underscore
+		var username = u[1];
+
+		//Grab all users for compiling leaderboard
+		let sql = 'SELECT * FROM ftduser WHERE score > 0 ORDER BY score DESC';
+        pool.query(sql, (err, pgRes) => {
+  			if (err){
+                res.status(501).json({ error: 'Internal server error'});
+			} else if(pgRes.rowCount >= 1){
+					res.status(200).json({"message" : pgRes.rows, "playerCount" : pgRes.rowCount})
+			} else {
+                res.status(404).json({ error: 'Leaderboard cannot be compiled: no users have played the game'});
+        	}
+		});
+	} catch(err) {
+        res.status(403).json({ error: 'You must be authenticated to view leaderboards'});
 	}
 });
 
@@ -388,6 +421,11 @@ app.post('/api/auth/login', function (req, res) {
 	res.json({"message":"authentication success"}); 
 });
 
+app.get('/api/auth/getScores', function (req, res) {
+	res.status(200); 
+	res.json({"message":"profile information extraction success"}); 
+});
+
 app.get('/api/auth/profile', function (req, res) {
 	res.status(200); 
 	res.json({"message":"profile information extraction success"}); 
@@ -417,10 +455,40 @@ app.post('/api/auth/test', function (req, res) {
 	res.status(200); 
 	res.json({"message":"got to /api/auth/test"}); 
 });
-
 //Game stuff below
 function randint(n){ return Math.round(Math.random()*n); }
 function rand(n){ return Math.random()*n; }
+
+function updateScore(score) {
+
+
+
+		credentials =  { 
+			"username": "user1"
+		};
+
+		$.ajax({
+
+			method: "PUT",
+			url: "/api/auth/updateScore",
+			data: JSON.stringify({}),
+			headers: { "PUT": "Score information", "username" : btoa(credentials.username), "score" : score },
+			//headers: { "Authorization": "Basic " + btoa(credentials.username + ":" + credentials.password) },
+			processData:false,
+			contentType: "application/json; charset=utf-8",
+			dataType:"json"
+
+		}).done(function(data, text_status, jqXHR){
+			
+			console.log(jqXHR.status+" "+text_status+JSON.stringify(data)); 
+
+		}).fail(function(err){
+
+			console.log("fail "+err.status+" "+JSON.stringify(err.responseJSON));
+
+		}); 	
+	
+}
 
 class Stage {
 	constructor(){
@@ -867,6 +935,8 @@ class Ball {
 									console.log("Decrease health");
 									stage.players[parseInt(this.shotFrom.substring(6, 
 													this.shotFrom.length))].score++;
+									//updateScore(stage.players[parseInt(this.shotFrom.substring(6, 
+										//this.shotFrom.length))].score);
 									object.health--;
 									this.lifetime = 0;
 								}
@@ -876,7 +946,9 @@ class Ball {
 							} else {
 								if (this.shotFrom.substring(0, 6) == "Player"){
 									stage.players[parseInt(this.shotFrom.substring(6, 
-													this.shotFrom.length))].score++;	
+													this.shotFrom.length))].score++;
+									//updateScore(stage.players[parseInt(this.shotFrom.substring(6, 
+										//this.shotFrom.length))].score);
 								}
 								
 								
